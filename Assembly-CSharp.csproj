@@ -50,6 +50,8 @@
   <ItemGroup>
     <Compile Include="Assets\KameraTakip.cs" />
     <Compile Include="Assets\OyuncuHareket.cs" />
+    <Compile Include="Assets\DuvarSaydam.cs" />
+    <Compile Include="Assets\Kapi.cs" />
     <Compile Include="Assets\copluk\TutorialInfo\Scripts\Readme.cs" />
   </ItemGroup>
   <ItemGroup>
