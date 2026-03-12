@@ -5,6 +5,7 @@ TagManager:
   serializedVersion: 3
   tags:
   - Oyuncu
+  - Mesale
   layers:
   - Default
   - TransparentFX
