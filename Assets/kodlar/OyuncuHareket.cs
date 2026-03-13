@@ -5,13 +5,15 @@ public class OyuncuHareket : MonoBehaviour
 {
     public float yurumeHizi = 4f;
     public float kosmaHizi = 7f;
-    public float hizlanma = 8f;
-    float mevcutHiz;
+
+    public float iconHizi = .5f;
 
     public float donmeHizi = 10f;
 
     public float stamina = 5f;
     public float maxStamina = 5f;
+
+    public float yorulduStaminaArtma = 5f;
 
     public float staminaAzalma = 1f;
     public float staminaDolma = 0.5f;
@@ -19,40 +21,73 @@ public class OyuncuHareket : MonoBehaviour
     bool yoruldu = false;
 
     public Slider staminaBar;
+    public GameObject yoruldunIkon;
 
-    CharacterController controller;
+    bool ikonDurum = false;
+    float ikonTimer = 0f;
 
-    Vector3 normalScale;
-    Vector3 comelmisScale;
+    Rigidbody rb;
 
     void Start()
     {
-        controller = GetComponent<CharacterController>();
+        rb = GetComponent<Rigidbody>();
 
-        normalScale = transform.localScale;
-        comelmisScale = new Vector3(normalScale.x, normalScale.y * 0.5f, normalScale.z);
+        if (yoruldunIkon != null)
+            yoruldunIkon.SetActive(false);
     }
 
     void Update()
     {
+        Hareket();
+        StaminaKontrol();
+        IkonKontrol();
+
+        if (staminaBar != null)
+            staminaBar.value = stamina;
+    }
+
+    void Hareket()
+    {
+        if (yoruldu)
+        {
+            rb.linearVelocity = new Vector3(0, rb.linearVelocity.y, 0);
+            return;
+        }
+
         float h = Input.GetAxisRaw("Horizontal");
         float v = Input.GetAxisRaw("Vertical");
 
         Vector3 hareket = new Vector3(h, 0, v).normalized;
 
-        float hedefHiz = yurumeHizi;
+        float hiz = yurumeHizi;
 
-        if (!yoruldu && Input.GetKey(KeyCode.LeftShift) && stamina > 0)
+        if (Input.GetKey(KeyCode.LeftShift) && stamina > 0)
+            hiz = kosmaHizi;
+
+        Vector3 hareketVektoru = hareket * hiz;
+
+        rb.linearVelocity = new Vector3(hareketVektoru.x, rb.linearVelocity.y, hareketVektoru.z);
+
+        if (hareket != Vector3.zero)
         {
-            hedefHiz = kosmaHizi;
+            Quaternion hedefRot = Quaternion.LookRotation(hareket);
+            transform.rotation = Quaternion.Slerp(transform.rotation, hedefRot, donmeHizi * Time.deltaTime);
+        }
+    }
+
+    void StaminaKontrol()
+    {
+        if (Input.GetKey(KeyCode.LeftShift) && !yoruldu)
+        {
             stamina -= staminaAzalma * Time.deltaTime;
+        }
+        else if(!Input.GetKey(KeyCode.LeftShift) && !yoruldu)
+        {
+            stamina += staminaDolma * Time.deltaTime;
         }
         else
         {
-            if (yoruldu)
-                stamina += (staminaDolma * 3f) * Time.deltaTime;
-            else
-                stamina += staminaDolma * Time.deltaTime;
+            stamina += yorulduStaminaArtma * Time.deltaTime;
         }
 
         stamina = Mathf.Clamp(stamina, 0, maxStamina);
@@ -60,31 +95,33 @@ public class OyuncuHareket : MonoBehaviour
         if (stamina <= 0)
         {
             yoruldu = true;
-            hareket = Vector3.zero;
-            transform.localScale = comelmisScale;
         }
 
         if (stamina >= maxStamina)
         {
             yoruldu = false;
-            transform.localScale = normalScale;
         }
+    }
 
+    void IkonKontrol()
+    {
         if (!yoruldu)
         {
-            mevcutHiz = Mathf.Lerp(mevcutHiz, hedefHiz, hizlanma * Time.deltaTime);
-            controller.Move(hareket * mevcutHiz * Time.deltaTime);
+            if (yoruldunIkon != null)
+                yoruldunIkon.SetActive(false);
+            return;
         }
 
-        if (hareket != Vector3.zero)
-        {
-            Quaternion hedefRotasyon = Quaternion.LookRotation(hareket);
-            transform.rotation = Quaternion.Slerp(transform.rotation, hedefRotasyon, donmeHizi * Time.deltaTime);
-        }
+        ikonTimer += Time.deltaTime;
 
-        if (staminaBar != null)
+        if (ikonTimer > iconHizi)
         {
-            staminaBar.value = stamina;
+            ikonDurum = !ikonDurum;
+
+            if (yoruldunIkon != null)
+                yoruldunIkon.SetActive(ikonDurum);
+
+            ikonTimer = 0f;
         }
     }
 }
