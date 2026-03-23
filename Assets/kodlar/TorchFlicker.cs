@@ -2,48 +2,29 @@ using UnityEngine;
 
 public class TorchFlicker : MonoBehaviour
 {
-    Light torchLight;
+    public Light torchLight;      // Torch objesinin Light componenti
+    public float minIntensity = 0.7f;
+    public float maxIntensity = 1.2f;
+    public float speed = 0.5f;    // Işığın artma/azalma hızı
 
-    public float minIntensity = 1.8f;
-    public float maxIntensity = 3f;
-
-    public float maxPlayerLight = 20f;
-    public float minPlayerLight = 15f;
-    public int lightVelocity = 5;
-
-    float currentLight;
-    bool increasing = true;
-
-    void Start()
-    {
-        torchLight = GetComponent<Light>();
-        currentLight = minPlayerLight;
-    }
+    private bool increasing = false;
 
     void Update()
     {
-        if (CompareTag("Mesale"))
+        if (torchLight != null)
         {
             if (increasing)
             {
-                currentLight += Time.deltaTime * lightVelocity;
-
-                if (currentLight >= maxPlayerLight)
+                torchLight.intensity += speed * Time.deltaTime;
+                if (torchLight.intensity >= maxIntensity)
                     increasing = false;
             }
             else
             {
-                currentLight -= Time.deltaTime * lightVelocity;
-
-                if (currentLight <= minPlayerLight)
+                torchLight.intensity -= speed * Time.deltaTime;
+                if (torchLight.intensity <= minIntensity)
                     increasing = true;
             }
-
-            torchLight.intensity = currentLight;
-        }
-        else
-        {
-            torchLight.intensity = Random.Range(minIntensity, maxIntensity);
         }
     }
 }
