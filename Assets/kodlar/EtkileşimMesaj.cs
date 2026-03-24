@@ -1,18 +1,18 @@
 using UnityEngine;
 using TMPro;
 
-public class EtkileşimMesaj : MonoBehaviour
+public class InteractMesaj : MonoBehaviour
 {
     public TextMeshProUGUI mesaj;
     public string mesajMetni = "Anahtar gerekiyor!";
     public float fadeSpeed = 2f;
 
-    private bool oyuncuYakinda = false;
     private float alpha = 0f;
+    private bool goster = false;
 
     void Start()
     {
-        // Başlangıçta görünmez yap
+        // Başlangıçta görünmez
         Color c = mesaj.color;
         c.a = 0f;
         mesaj.color = c;
@@ -20,12 +20,11 @@ public class EtkileşimMesaj : MonoBehaviour
 
     void Update()
     {
-        // Smooth fade in/out
-        float targetAlpha = oyuncuYakinda ? 1f : 0f;
+        float targetAlpha = goster ? 1f : 0f;
         alpha = Mathf.MoveTowards(alpha, targetAlpha, fadeSpeed * Time.deltaTime);
 
         Color c = mesaj.color;
-        c.a = alpha; // Alpha değerini koddan ayarlıyoruz
+        c.a = alpha;
         mesaj.color = c;
     }
 
@@ -33,8 +32,14 @@ public class EtkileşimMesaj : MonoBehaviour
     {
         if (other.CompareTag("Oyuncu"))
         {
-            oyuncuYakinda = true;
-            mesaj.text = mesajMetni;
+            Envanter env = other.GetComponent<Envanter>();
+
+            // 🔥 Anahtar yoksa mesaj göster
+            if (env != null && !env.EsyaVarMi("Anahtar"))
+            {
+                mesaj.text = mesajMetni;
+                goster = true;
+            }
         }
     }
 
@@ -42,7 +47,7 @@ public class EtkileşimMesaj : MonoBehaviour
     {
         if (other.CompareTag("Oyuncu"))
         {
-            oyuncuYakinda = false;
+            goster = false;
         }
     }
 }
